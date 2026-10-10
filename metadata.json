@@ -1,0 +1,6 @@
+{
+  "name": "HoneyDip Donuts & Diner",
+  "description": "Beloved Columbus, OH landmark diner serving handcrafted scratch donuts, hearty breakfast plates, and fresh roasts since 1976.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
