@@ -22,11 +22,14 @@ export default function App() {
       return;
     }
 
+    const revealEl = (el: Element) => el.classList.add('is-visible');
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
+            revealEl(entry.target);
+            observer.unobserve(entry.target);
           }
         });
       },
@@ -36,7 +39,28 @@ export default function App() {
     const elements = document.querySelectorAll('.reveal-on-scroll');
     elements.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
+    // Safety net: on some mobile browsers the observer can misfire and leave
+    // sections permanently hidden (invisible products). Every 2s, force-reveal
+    // any not-yet-visible element currently in (or near) the viewport.
+    // Stops itself once everything is visible.
+    const safetyNet = window.setInterval(() => {
+      const vh = window.innerHeight;
+      let pending = false;
+      document.querySelectorAll('.reveal-on-scroll:not(.is-visible)').forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < vh * 1.25 && rect.bottom > -vh * 0.25) {
+          revealEl(el);
+        } else {
+          pending = true;
+        }
+      });
+      if (!pending) window.clearInterval(safetyNet);
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(safetyNet);
+    };
   }, []);
 
   // Cart counts lookup for menu items
